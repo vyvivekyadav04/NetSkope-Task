@@ -1,0 +1,47 @@
+name: Bandit Security Scan
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+      
+jobs:
+  bandit:
+    permissions: write-all
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8' # Adjust the version as necessary
+
+      - name: Install Bandit
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Bandit
+        run: |
+          bandit -r . --format sarif --output bandit_report.sarif || true
+      
+      - name: Upload Bandit results as code scanning alerts
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: bandit_report.sarif
+   
+
+      - name: Check for Bandit issues
+        run: |
+          if grep -q '"issue"' bandit_report.json; then
+            echo "Bandit found issues in the code."
+            exit 1
+          else
+            echo "No issues found by Bandit."
+          fi
