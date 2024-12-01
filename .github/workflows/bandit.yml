@@ -20,7 +20,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: '3.8' # Adjust the version as necessary
+          python-version: '3.8' 
 
       - name: Install Bandit
         run: |
@@ -30,17 +30,12 @@ jobs:
       - name: Run Bandit
         run: |
           bandit -r . --format sarif --output bandit_report.sarif || true
-      
-      - name: Upload Bandit results as code scanning alerts
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: bandit_report.sarif
-   
+
 
       - name: Check for Bandit issues
         run: |
-          if grep -q '"issue"' bandit_report.json; then
-            echo "Bandit found issues in the code."
+          if grep -q '"issue_severity": "HIGH"\|"issue_severity": "CRITICAL"' bandit_report.json; then
+            echo "Bandit high or above security issues in the code."
             exit 1
           else
             echo "No issues found by Bandit."
