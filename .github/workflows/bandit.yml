@@ -29,7 +29,7 @@ jobs:
 
       - name: Run Bandit
         run: |
-          bandit -r . --format sarif --output bandit_report.sarif || true
+          bandit -r . --format json --output bandit_report.json || true
 
 
       - name: Check for Bandit issues
